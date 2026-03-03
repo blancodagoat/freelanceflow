@@ -46,3 +46,5 @@ Full setup, configuration, API reference, and deployment are in **[docs/DOCUMENT
 ## License
 
 Private. All rights reserved.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q668VS3)

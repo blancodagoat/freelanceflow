@@ -7,24 +7,35 @@ export default function AcceptProposalButton({ proposalId, slug }: { proposalId:
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function accept() {
     setLoading(true);
-    const res = await fetch(`/api/proposals/${proposalId}/accept`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: slug }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setDone(true);
-      router.refresh();
+    setError(null);
+    try {
+      const res = await fetch(`/api/proposals/${proposalId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: slug }),
+      });
+      setLoading(false);
+      if (res.ok) {
+        setDone(true);
+        router.refresh();
+      } else {
+        setError('Failed to accept proposal');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
   }
 
   if (done) return <p className="text-green-700 font-medium">Accepted. Thank you.</p>;
 
   return (
+    <>
+    {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
     <button
       type="button"
       onClick={accept}
@@ -33,5 +44,6 @@ export default function AcceptProposalButton({ proposalId, slug }: { proposalId:
     >
       {loading ? 'Accepting...' : 'Accept proposal'}
     </button>
+    </>
   );
 }

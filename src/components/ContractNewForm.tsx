@@ -23,20 +23,25 @@ export default function ContractNewForm({ proposals }: { proposals: ProposalOpti
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await fetch('/api/contracts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ proposal_id: proposalId, title: title || selected?.title || 'Contract' }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}));
-      setError(d.error ?? 'Something went wrong');
-      return;
+    try {
+      const res = await fetch('/api/contracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposal_id: proposalId, title: title || selected?.title || 'Contract' }),
+      });
+      setLoading(false);
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? 'Something went wrong');
+        return;
+      }
+      const data = await res.json();
+      router.push(`/contracts/${data.id}`);
+      router.refresh();
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
-    const data = await res.json();
-    router.push(`/contracts/${data.id}`);
-    router.refresh();
   }
 
   if (!proposals.length) {

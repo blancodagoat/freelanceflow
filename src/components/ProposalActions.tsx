@@ -17,12 +17,17 @@ export default function ProposalActions({ proposal }: { proposal: Proposal }) {
   async function send() {
     setLoading(true);
     setError(null);
-    const res = await fetch(`/api/proposals/${proposal.id}/send`, { method: 'POST' });
-    setLoading(false);
-    if (res.ok) {
-      router.refresh();
-    } else {
-      setError('Failed to send proposal');
+    try {
+      const res = await fetch(`/api/proposals/${proposal.id}/send`, { method: 'POST' });
+      setLoading(false);
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setError('Failed to send proposal');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
   }
 

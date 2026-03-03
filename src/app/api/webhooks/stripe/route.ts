@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
 export async function POST(request: Request) {
@@ -13,8 +13,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+  }
+
   const stripe = new Stripe(key);
-  const supabase = await createClient();
+  const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey);
 
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');

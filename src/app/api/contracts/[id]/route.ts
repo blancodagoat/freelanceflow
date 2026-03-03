@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { contractUpdateSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
@@ -30,8 +31,15 @@ export async function PATCH(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await request.json();
-  const { status, signed_pdf_url, signed_at, external_signature_id } = body;
+  const parseResult = contractUpdateSchema.safeParse(await request.json());
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', details: parseResult.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const { status, signed_pdf_url, signed_at, external_signature_id } = parseResult.data;
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (status !== undefined) updates.status = status;

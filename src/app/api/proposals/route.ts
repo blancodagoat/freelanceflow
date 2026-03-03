@@ -65,7 +65,12 @@ export async function POST(request: Request) {
       unit_price_cents: item.unit_price_cents,
       sort_order: i,
     }));
-    await supabase.from('proposal_items').insert(rows);
+    const { error: itemsError } = await supabase
+      .from('proposal_items')
+      .insert(rows);
+    if (itemsError) {
+      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+    }
   }
 
   const { data: full } = await supabase

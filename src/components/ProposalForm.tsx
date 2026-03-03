@@ -51,26 +51,31 @@ export default function ProposalForm({
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const url = proposal ? `/api/proposals/${proposal.id}` : '/api/proposals';
-    const res = await fetch(url, {
-      method: proposal ? 'PATCH' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: clientId,
-        title,
-        valid_until: validUntil || null,
-        items: items.filter((i) => i.description.trim()),
-      }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}));
-      setError(d.error ?? 'Something went wrong');
-      return;
+    try {
+      const url = proposal ? `/api/proposals/${proposal.id}` : '/api/proposals';
+      const res = await fetch(url, {
+        method: proposal ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          title,
+          valid_until: validUntil || null,
+          items: items.filter((i) => i.description.trim()),
+        }),
+      });
+      setLoading(false);
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? 'Something went wrong');
+        return;
+      }
+      const data = await res.json();
+      router.push(`/proposals/${data.id}`);
+      router.refresh();
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
-    const data = await res.json();
-    router.push(`/proposals/${data.id}`);
-    router.refresh();
   }
 
   return (

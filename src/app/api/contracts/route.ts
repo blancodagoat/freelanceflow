@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { contractSchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await request.json();
-  const { proposal_id, title } = body;
-  if (!proposal_id || !title) {
-    return NextResponse.json({ error: 'proposal_id and title are required' }, { status: 400 });
+  const parseResult = contractSchema.safeParse(await request.json());
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', details: parseResult.error.flatten().fieldErrors },
+      { status: 400 }
+    );
   }
+
+  const { proposal_id, title } = parseResult.data;
 
   const { data: proposal } = await supabase
     .from('proposals')

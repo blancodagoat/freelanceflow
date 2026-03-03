@@ -59,7 +59,13 @@ export async function PATCH(
     );
     updates.total_cents = total_cents;
 
-    await supabase.from('proposal_items').delete().eq('proposal_id', id);
+    const { error: deleteError } = await supabase
+      .from('proposal_items')
+      .delete()
+      .eq('proposal_id', id);
+    if (deleteError) {
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
     if (items.length) {
       const rows = items.map((item, i) => ({
         proposal_id: id,
@@ -68,7 +74,12 @@ export async function PATCH(
         unit_price_cents: item.unit_price_cents,
         sort_order: i,
       }));
-      await supabase.from('proposal_items').insert(rows);
+      const { error: insertError } = await supabase
+        .from('proposal_items')
+        .insert(rows);
+      if (insertError) {
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
+      }
     }
   }
 

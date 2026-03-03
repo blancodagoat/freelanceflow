@@ -76,27 +76,32 @@ export default function InvoiceForm({
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const proposalId = selectedContract?.proposal?.id ?? null;
-    const res = await fetch('/api/invoices', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: clientId,
-        contract_id: contractId || null,
-        proposal_id: proposalId,
-        due_date: dueDate || null,
-        items: items.filter((i) => i.description.trim()),
-      }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}));
-      setError(d.error ?? 'Something went wrong');
-      return;
+    try {
+      const proposalId = selectedContract?.proposal?.id ?? null;
+      const res = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          contract_id: contractId || null,
+          proposal_id: proposalId,
+          due_date: dueDate || null,
+          items: items.filter((i) => i.description.trim()),
+        }),
+      });
+      setLoading(false);
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? 'Something went wrong');
+        return;
+      }
+      const data = await res.json();
+      router.push(`/invoices/${data.id}`);
+      router.refresh();
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
-    const data = await res.json();
-    router.push(`/invoices/${data.id}`);
-    router.refresh();
   }
 
   return (

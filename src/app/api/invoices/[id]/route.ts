@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { invoiceUpdateSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
@@ -30,8 +31,15 @@ export async function PATCH(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await request.json();
-  const { status, stripe_payment_link_url, stripe_payment_link_id, paid_at } = body;
+  const parseResult = invoiceUpdateSchema.safeParse(await request.json());
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', details: parseResult.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const { status, stripe_payment_link_url, stripe_payment_link_id, paid_at } = parseResult.data;
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (status !== undefined) updates.status = status;

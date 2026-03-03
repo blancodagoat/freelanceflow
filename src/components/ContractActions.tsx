@@ -16,27 +16,37 @@ export default function ContractActions({ contract }: { contract: Contract }) {
   async function requestSignature() {
     setLoading('signature');
     setError(null);
-    const res = await fetch(`/api/contracts/${contract.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'pending_signature' }),
-    });
-    setLoading(null);
-    if (res.ok) router.refresh();
-    else setError('Failed to request signature');
+    try {
+      const res = await fetch(`/api/contracts/${contract.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'pending_signature' }),
+      });
+      setLoading(null);
+      if (res.ok) router.refresh();
+      else setError('Failed to request signature');
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(null);
+    }
   }
 
   async function markSigned() {
     setLoading('signed');
     setError(null);
-    const res = await fetch(`/api/contracts/${contract.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'signed', signed_at: new Date().toISOString() }),
-    });
-    setLoading(null);
-    if (res.ok) router.refresh();
-    else setError('Failed to mark as signed');
+    try {
+      const res = await fetch(`/api/contracts/${contract.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'signed', signed_at: new Date().toISOString() }),
+      });
+      setLoading(null);
+      if (res.ok) router.refresh();
+      else setError('Failed to mark as signed');
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(null);
+    }
   }
 
   return (

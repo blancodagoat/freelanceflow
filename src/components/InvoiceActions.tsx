@@ -36,27 +36,37 @@ export default function InvoiceActions({ invoice }: { invoice: Invoice }) {
   async function markSent() {
     setLoading('sent');
     setError(null);
-    const res = await fetch(`/api/invoices/${invoice.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'sent' }),
-    });
-    setLoading(null);
-    if (res.ok) router.refresh();
-    else setError('Failed to mark as sent');
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'sent' }),
+      });
+      setLoading(null);
+      if (res.ok) router.refresh();
+      else setError('Failed to mark as sent');
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(null);
+    }
   }
 
   async function markPaid() {
     setLoading('paid');
     setError(null);
-    const res = await fetch(`/api/invoices/${invoice.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'paid', paid_at: new Date().toISOString() }),
-    });
-    setLoading(null);
-    if (res.ok) router.refresh();
-    else setError('Failed to mark as paid');
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'paid', paid_at: new Date().toISOString() }),
+      });
+      setLoading(null);
+      if (res.ok) router.refresh();
+      else setError('Failed to mark as paid');
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(null);
+    }
   }
 
   return (

@@ -16,19 +16,24 @@ export default function ClientForm({ client }: { client?: Client }) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await fetch(client ? `/api/clients/${client.id}` : '/api/clients', {
-      method: client ? 'PATCH' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, company: company || null }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}));
-      setError(d.error ?? 'Something went wrong');
-      return;
+    try {
+      const res = await fetch(client ? `/api/clients/${client.id}` : '/api/clients', {
+        method: client ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, company: company || null }),
+      });
+      setLoading(false);
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? 'Something went wrong');
+        return;
+      }
+      router.push('/clients');
+      router.refresh();
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
     }
-    router.push('/clients');
-    router.refresh();
   }
 
   return (

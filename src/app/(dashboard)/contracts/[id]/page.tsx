@@ -5,7 +5,7 @@ import ContractActions from '@/components/ContractActions';
 
 export default async function ContractPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
@@ -78,7 +78,7 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
           <p className="text-right font-semibold mt-2">Total: ${((proposal?.total_cents ?? 0) / 100).toFixed(2)}</p>
         </div>
         <p className="text-sm text-neutral-500">
-          E-signature: Integrate Dropbox Sign or DocuSign to send for signature and store the signed PDF. Until then, use Mark as signed after receiving a signed copy.
+          Use &ldquo;Mark as signed&rdquo; after receiving a signed copy of this contract.
         </p>
       </div>
     </div>

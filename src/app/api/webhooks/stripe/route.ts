@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(key);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');

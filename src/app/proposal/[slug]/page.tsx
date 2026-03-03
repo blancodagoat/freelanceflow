@@ -7,7 +7,7 @@ export const revalidate = 0;
 
 export default async function PublicProposalPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: proposal } = await supabase
     .from('proposals')
     .select('*, client:clients(name, email, company), items:proposal_items(*)')

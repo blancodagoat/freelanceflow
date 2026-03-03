@@ -3,7 +3,7 @@ import InvoiceForm from '@/components/InvoiceForm';
 import Link from 'next/link';
 
 export default async function NewInvoicePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 

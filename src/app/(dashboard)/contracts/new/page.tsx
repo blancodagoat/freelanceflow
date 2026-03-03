@@ -3,7 +3,7 @@ import ContractNewForm from '@/components/ContractNewForm';
 import Link from 'next/link';
 
 export default async function NewContractPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 

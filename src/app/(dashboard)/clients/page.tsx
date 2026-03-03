@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ClientsTableSkeleton } from '@/components/Skeleton';
 
 async function ClientsList() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 

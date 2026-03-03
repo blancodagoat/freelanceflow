@@ -3,7 +3,7 @@ import ProposalForm from '@/components/ProposalForm';
 import Link from 'next/link';
 
 export default async function NewProposalPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 

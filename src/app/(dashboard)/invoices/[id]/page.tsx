@@ -6,7 +6,7 @@ import InvoiceActions from '@/components/InvoiceActions';
 export default async function InvoicePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ paid?: string }> }) {
   const { id } = await params;
   const { paid } = await searchParams;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 

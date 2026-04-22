@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Unified Freelancer Stack",
-  description: "Proposals, contracts, and invoicing in one place.",
+  title: "freelanceflow — proposal, contract, invoice in one link",
+  description: "Proposals, e-signed contracts, and invoicing in a single flow. Built for solo freelancers.",
 };
 
 export default function RootLayout({

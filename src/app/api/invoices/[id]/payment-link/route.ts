@@ -8,10 +8,15 @@ function getStripe(): Stripe | null {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const base = process.env.NEXT_PUBLIC_APP_URL
+    || (process.env.NODE_ENV !== 'production' ? new URL(request.url).origin : null);
+  if (!base) {
+    return NextResponse.json({ error: 'NEXT_PUBLIC_APP_URL not configured' }, { status: 500 });
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -35,6 +40,10 @@ export async function POST(
 
   const amountCents = Number(invoice.total_cents);
 
+  if (!Number.isFinite(amountCents) || amountCents < 50 || !Number.isInteger(amountCents)) {
+    return NextResponse.json({ error: 'Invalid invoice amount (must be integer >= 50 cents)' }, { status: 400 });
+  }
+
   const paymentLink = await stripe.paymentLinks.create({
     line_items: [
       {
@@ -52,11 +61,11 @@ export async function POST(
     metadata: { invoice_id: id, user_id: user.id },
     after_completion: {
       type: 'redirect',
-      redirect: { url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/invoices/${id}?paid=1` },
+      redirect: { url: `${base}/invoices/${id}?paid=1` },
     },
   });
 
-  await supabase
+  const { data: updated, error: updateErr } = await supabase
     .from('invoices')
     .update({
       stripe_payment_link_id: paymentLink.id,
@@ -64,7 +73,25 @@ export async function POST(
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .is('stripe_payment_link_url', null)
+    .select()
+    .single();
+
+  if (updateErr || !updated) {
+    // Someone else won — deactivate our orphan and return theirs.
+    await stripe.paymentLinks.update(paymentLink.id, { active: false }).catch(() => {});
+    const { data: winner } = await supabase
+      .from('invoices')
+      .select('stripe_payment_link_url, stripe_payment_link_id')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+    if (winner?.stripe_payment_link_url) {
+      return NextResponse.json({ url: winner.stripe_payment_link_url, payment_link_id: winner.stripe_payment_link_id });
+    }
+    return NextResponse.json({ error: 'payment link creation race' }, { status: 409 });
+  }
 
   return NextResponse.json({ url: paymentLink.url, payment_link_id: paymentLink.id });
 }

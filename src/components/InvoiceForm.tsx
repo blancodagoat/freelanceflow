@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface ClientOption {
@@ -39,20 +39,22 @@ export default function InvoiceForm({
 
   const selectedContract = contracts.find((c) => c.id === contractId);
 
-  useEffect(() => {
-    if (selectedContract?.proposal?.items?.length) {
+  function handleContractChange(nextContractId: string) {
+    setContractId(nextContractId);
+    const nextContract = contracts.find((c) => c.id === nextContractId);
+    if (nextContract?.proposal?.items?.length) {
       setItems(
-        selectedContract.proposal.items.map((i) => ({
+        nextContract.proposal.items.map((i) => ({
           description: i.description,
           quantity: i.quantity,
           unit_price_cents: i.unit_price_cents,
         }))
       );
     }
-    if (selectedContract?.client_id) {
-      setClientId(selectedContract.client_id);
+    if (nextContract?.client_id) {
+      setClientId(nextContract.client_id);
     }
-  }, [contractId, selectedContract?.client_id, selectedContract?.proposal?.items]);
+  }
 
   function addLine() {
     setItems((prev) => [...prev, { description: '', quantity: 1, unit_price_cents: 0 }]);
@@ -132,7 +134,7 @@ export default function InvoiceForm({
         <select
           id="contract"
           value={contractId}
-          onChange={(e) => setContractId(e.target.value)}
+          onChange={(e) => handleContractChange(e.target.value)}
           className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
         >
           <option value="">None / manual</option>

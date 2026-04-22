@@ -1,5 +1,5 @@
 {
-  "name": "unified-freelancer-stack",
+  "name": "freelanceflow",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,7 +23,8 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^10.0.2",
+    "@eslint/js": "^9.39.0",
+    "eslint": "^9.39.0",
     "eslint-config-next": "^16.1.6",
     "postcss": "^8",
     "tailwindcss": "^4.2.1",
